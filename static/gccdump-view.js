@@ -127,6 +127,20 @@ define(function (require) {
         this.eventHub.emit('gccDumpUIInit', this.state._compilerid);
     }
 
+    // Disable view's menu when invalid compiler has been
+    // selected after view is opened.
+    GccDump.prototype.onUiNotReady = function () {
+        this.filters.off('change');
+        this.selectize.off('change');
+
+        // disable drop down menu and buttons
+        this.selectize.disable();
+        this.domRoot.find('.dump-filters').find('.btn')
+            .each(function () {
+                $(this).addClass('disabled');
+            });
+    };
+
     GccDump.prototype.onUiReady = function () {
         this.filters.on('change', _.bind(this.onFilterChange, this));
         this.selectize.on('change', _.bind(this.onPassSelect, this));
@@ -232,16 +246,19 @@ define(function (require) {
             }
             this.updatePass(this.filters, this.selectize, result.gccDumpOutput);
             this.showGccDumpResults(currOutput);
+
+            // enable UI on first successful compilation or after an invalid compiler selection (eg. clang)
+            if (!this.uiIsReady) {
+                this.uiIsReady = true;
+                this.onUiReady();
+            }
         } else {
             this.selectize.clear(true);
             this.state.selectedPass = '';
             this.updatePass(this.filters, this.selectize, false);
-            this.showGccDumpResults('<no output>');
-        }
-        // enable UI on first compilation
-        if (!this.uiIsReady) {
-            this.uiIsReady = true;
-            this.onUiReady();
+            this.showGccDumpResults('<no output, maybe you switched to a non-GCC compiler ?>');
+            this.uiIsReady = false;
+            this.onUiNotReady();
         }
 
         this.saveState();
