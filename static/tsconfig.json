@@ -21,6 +21,7 @@
 		"panes/pane.interfaces.ts",
 		"panes/rustmacroexp-view.ts",
 		"panes/rustmir-view.ts",
+		"panes/gnatdebug-view.ts",
 		"settings.interfaces.ts",
 		"sharing.ts",
 		"url.ts",
